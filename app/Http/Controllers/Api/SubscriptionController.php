@@ -85,7 +85,7 @@ class SubscriptionController extends Controller
      *
      * @param \Illuminate\Http\Request
      *
-     * @return Response::json
+     * @return XML|Response::json
      */
     public function getRubricSubscriptions(Request $request)
     {
@@ -101,7 +101,7 @@ class SubscriptionController extends Controller
         $rubric = Rubric::where('id', $request->rubric_id)->firstOrFail();
         // Формируем выдачу
         $subscriptions = Subscription::where('rubric_id', $rubric->id)->offset($offset)->limit($limit)->get();
-        return ($xml == 'true') ? $this->arrayToXml($subscriptions->all()) : Response::json($subscriptions, 200);
+        return ($xml == 'true') ? $this->arrayToXml($subscriptions) : Response::json($subscriptions, 200);
     }
 
     /**
@@ -109,7 +109,7 @@ class SubscriptionController extends Controller
      *
      * @param \Illuminate\Http\Request
      *
-     * @return Response::json
+     * @return XML|Response::json
      */
     public function getUserSubscriptions(Request $request)
     {
@@ -125,16 +125,23 @@ class SubscriptionController extends Controller
         $user = User::where('email', $request->email)->firstOrFail();
         // Формируем выдачу
         $subscriptions = Subscription::where('user_id', $user->id)->offset($offset)->limit($limit)->get();
-        return ($xml == 'true') ? $this->arrayToXml($subscriptions->all()) : Response::json($subscriptions, 200);
+        return ($xml == 'true') ? $this->arrayToXml($subscriptions) : Response::json($subscriptions, 200);
     }
 
+    /**
+     * Преобразовать коллекцию в XML
+     *
+     * @param Illuminate\Database\Eloquent\Collection
+     *
+     * @return XML|Response::json
+     */
     public function arrayToXml($array)
     {
         $tempArr = [];
         foreach ($array as $key => $value) {
             // Заменяем ключи
             if (is_numeric($key)) {
-                $key = 'Subscription'.$key;
+                $key = 'Subscription '.$key;
             }
             // Превращаем эллементы коллекции в массив
             if (is_object($value)) {
