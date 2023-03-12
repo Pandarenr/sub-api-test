@@ -3,22 +3,22 @@
 
 Реализовать **API для подписки на новости**.
 
-Реализованно:
-  Подписка пользователя по email на нужную рубрику:
-    /subscriptions/rubrics/{rubric_id}/{email}
-  Удаление подписки на конкретную рубрику:
-    /subscriptions/rubrics/{rubric_id}/{email}
-  Удаление подписки на все рубрики:
-    /subscriptions/users/{email}
-  Получение токена для аутентификации доступа к get запросам:
-    Необходимо указать имя
-    /register-application
+Реализованно:<br /><br />
+  Подписка пользователя по email на нужную рубрику:<br />
+    /subscriptions/rubrics/{rubric_id}/{email}<br /><br />
+  Удаление подписки на конкретную рубрику:<br />
+    /subscriptions/rubrics/{rubric_id}/{email}<br /><br />
+  Удаление подписки на все рубрики:<br />
+    /subscriptions/users/{email}<br /><br />
+  Получение токена для аутентификации доступа к get запросам:<br />
+    Необходимо указать имя<br />
+    /register-application<br /><br />
 
   Параметры limit, offset, xml доступны.
 
-  Отображение подписок пользователя:
-    /subscriptions/users/{email}
-  Отображение всех пользователей переданной рубрики:
+  Отображение подписок пользователя:<br />
+    /subscriptions/users/{email}<br /><br />
+  Отображение всех пользователей переданной рубрики:<br />
     /subscriptions/rubrics/{rubric_id}
 
 API должно выполнять следующие задачи:
