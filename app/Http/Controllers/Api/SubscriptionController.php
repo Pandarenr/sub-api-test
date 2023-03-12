@@ -9,6 +9,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Response;
 use Illuminate\Support\Facades\Validator;
+use Spatie\ArrayToXml\ArrayToXml;
+use SimpleXMLElement;
 
 class SubscriptionController extends Controller
 {
@@ -92,14 +94,14 @@ class SubscriptionController extends Controller
             'rubric_id' => $request->route('rubric_id')
         ]);
         // Задаём параметры выдачи
-        $limit = ((int)$request->limit)? : 5;
-        $offset = ((int)$request->offset)? : null;
-        $xml = ($request->xml)? : false;
+        $limit = ((int)$request->limit) ? : 5;
+        $offset = ((int)$request->offset) ? : null;
+        $xml = ($request->xml) ? : 'false';
         // Находим рубрику
         $rubric = Rubric::where('id', $request->rubric_id)->firstOrFail();
         // Формируем выдачу
         $subscriptions = Subscription::where('rubric_id', $rubric->id)->offset($offset)->limit($limit)->get();
-        return Response::json($subscriptions, 200);
+        return ($xml == 'true') ? $this->arrayToXml($subscriptions->all()) : Response::json($subscriptions, 200);
     }
 
     /**
@@ -116,13 +118,32 @@ class SubscriptionController extends Controller
             'email' => $request->route('email')
         ]);
         // Задаём параметры выдачи
-        $limit = ((int)$request->limit)? : 5;
-        $offset = ((int)$request->offset)? : null;
-        $xml = ($request->xml)? : false;
+        $limit = ((int)$request->limit) ? : 5;
+        $offset = ((int)$request->offset) ? : null;
+        $xml = ($request->xml) ? : 'false';
         // Находим пользователя
         $user = User::where('email', $request->email)->firstOrFail();
         // Формируем выдачу
         $subscriptions = Subscription::where('user_id', $user->id)->offset($offset)->limit($limit)->get();
-        return Response::json($subscriptions, 200);
+        return ($xml == 'true') ? $this->arrayToXml($subscriptions->all()) : Response::json($subscriptions, 200);
+    }
+
+    public function arrayToXml($array)
+    {
+        $tempArr = [];
+        foreach ($array as $key => $value) {
+            // Заменяем ключи
+            if (is_numeric($key)) {
+                $key = 'Subscription'.$key;
+            }
+            // Превращаем эллементы коллекции в массив
+            if (is_object($value)) {
+                $value = $value->toArray();
+            }
+            // Заполняем временный массив
+            $tempArr[$key] = $value;
+        }
+        // Возращаем XML
+        return ArrayToXml::convert($tempArr);
     }
 }
