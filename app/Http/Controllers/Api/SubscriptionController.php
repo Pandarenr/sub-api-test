@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Response;
 use Illuminate\Support\Facades\Validator;
 use Spatie\ArrayToXml\ArrayToXml;
-use SimpleXMLElement;
+use App\Http\Requests\SubscriptionRequest;
 
 class SubscriptionController extends Controller
 {
@@ -21,13 +21,11 @@ class SubscriptionController extends Controller
      *
      * @return Response::json
      */
-    public function subscribe(Request $request)
+    public function subscribe(SubscriptionRequest $request)
     {
-        // Добавляем параметры из пути в запрос.
-        $request->merge([
-            'rubric_id' => $request->route('rubric_id'),
-            'email' => $request->route('email')
-        ]);
+        // Проводим валидацию и добавляем параметры из пути в запрос
+        $request->validated();
+        $request->merge($request->route()->parameters());
         // Если пользователя нет в базе, добавляем его
         $subscriber = User::firstOrCreate(['email' => $request->email]);
         // Проверяем существует ли рубрика
@@ -44,13 +42,11 @@ class SubscriptionController extends Controller
      *
      * @return Response::json
      */
-    public function unsubscribe(Request $request)
+    public function unsubscribe(SubscriptionRequest $request)
     {
-        // Добавляем параметры из пути в запрос.
-        $request->merge([
-            'rubric_id' => $request->route('rubric_id'),
-            'email' => $request->route('email')
-        ]);
+        // Проводим валидацию и добавляем параметры из пути в запрос
+        $request->validated();
+        $request->merge($request->route()->parameters());
         // Проверяем существует ли пользователь
         $subscriber = User::where('email', $request->email)->firstOrFail();
         // Проверяем существует ли рубрика
@@ -68,12 +64,11 @@ class SubscriptionController extends Controller
      *
      * @return Response::json
      */
-    public function unsubscribeUser(Request $request)
+    public function unsubscribeUser(SubscriptionRequest $request)
     {
-        // Добавляем параметры из пути в запрос.
-        $request->merge([
-            'email' => $request->route('email')
-        ]);
+        // Проводим валидацию и добавляем параметры из пути в запрос
+        $request->validated();
+        $request->merge($request->route()->parameters());
         // Проверяем существует ли пользователь
         $subscriber = User::where('email', $request->email)->firstOrFail();
         $subscriber->rubrics()->detach();
@@ -87,12 +82,11 @@ class SubscriptionController extends Controller
      *
      * @return XML|Response::json
      */
-    public function getRubricSubscriptions(Request $request)
+    public function getRubricSubscriptions(SubscriptionRequest $request)
     {
-        // Добавляем параметры из пути в запрос
-        $request->merge([
-            'rubric_id' => $request->route('rubric_id')
-        ]);
+        // Проводим валидацию и добавляем параметры из пути в запрос
+        $request->validated();
+        $request->merge($request->route()->parameters());
         // Задаём параметры выдачи
         $limit = ((int)$request->limit) ? : 5;
         $offset = ((int)$request->offset) ? : null;
@@ -111,12 +105,11 @@ class SubscriptionController extends Controller
      *
      * @return XML|Response::json
      */
-    public function getUserSubscriptions(Request $request)
+    public function getUserSubscriptions(SubscriptionRequest $request)
     {
-        // Добавляем параметры из пути в запрос
-        $request->merge([
-            'email' => $request->route('email')
-        ]);
+        // Проводим валидацию и добавляем параметры из пути в запрос
+        $request->validated();
+        $request->merge($request->route()->parameters());
         // Задаём параметры выдачи
         $limit = ((int)$request->limit) ? : 5;
         $offset = ((int)$request->offset) ? : null;
@@ -133,7 +126,7 @@ class SubscriptionController extends Controller
      *
      * @param Illuminate\Database\Eloquent\Collection
      *
-     * @return XML|Response::json
+     * @return XML
      */
     public function arrayToXml($array)
     {
