@@ -28,12 +28,11 @@ class SubscriptionController extends Controller
         ]);
         // Если пользователя нет в базе, добавляем его
         $subscriber = User::firstOrCreate(['email' => $request->email]);
+        // Проверяем существует ли рубрика
+        $rubric = Rubric::where('id', $request->rubric_id)->firstOrfail();
         // Проверяем существует ли подписка. Добавляем если нет
-        $subscription = Subscription::where('rubric_id', $request->rubric_id)->where('user_id', $subscriber->id)->first();
-        if (is_null($subscription)) {
-            $subscriber->rubrics()->attach($request->rubric_id);
-        }
-        return Response::json('', 200);
+        $subscription = Subscription::firstOrCreate(['rubric_id' => $rubric->id, 'user_id' => $subscriber->id]);
+        return Response::json('You have been subscribed', 200);
     }
 
     /**
@@ -51,13 +50,13 @@ class SubscriptionController extends Controller
             'email' => $request->route('email')
         ]);
         // Проверяем существует ли пользователь
-        $subscriber = User::where('email', $request->email)->first();
-        // Проверяем существует ли подписка. Если да, удаляем её.
-        $subscription = Subscription::where('rubric_id', $request->rubric_id)->where('user_id', $subscriber->id)->first();
-        if (isset($subscription)) {
-            $subscriber->rubrics()->detach($request->rubric_id);
-        }
-        return Response::json('', 200);
+        $subscriber = User::where('email', $request->email)->firstOrFail();
+        // Проверяем существует ли рубрика
+        $rubric = Rubric::where('id', $request->rubric_id)->firstOrfail();
+        // Проверяем существует ли подписка.
+        $subscription = Subscription::where(['rubric_id' => $rubric->id, 'user_id' => $subscriber->id])->firstOrFail();
+        $subscriber->rubrics()->detach($request->rubric_id);
+        return Response::json('You have been unsubscribed', 200);
     }
 
     /**
@@ -74,11 +73,9 @@ class SubscriptionController extends Controller
             'email' => $request->route('email')
         ]);
         // Проверяем существует ли пользователь
-        $subscriber = User::where('email', $request->email)->first();
-        if (isset($subscriber)) {
-            $subscriber->rubrics()->detach();
-        }
-        return Response::json('', 200);
+        $subscriber = User::where('email', $request->email)->firstOrFail();
+        $subscriber->rubrics()->detach();
+        return Response::json('Your have been unsubscribe from all rubrics', 200);
     }
 
     /**
@@ -99,7 +96,7 @@ class SubscriptionController extends Controller
         $offset = ((int)$request->offset)? : null;
         $xml = ($request->xml)? : false;
         // Находим рубрику
-        $rubric = Rubric::where('id', $request->rubric_id)->first();
+        $rubric = Rubric::where('id', $request->rubric_id)->firstOrFail();
         // Формируем выдачу
         $subscriptions = Subscription::where('rubric_id', $rubric->id)->offset($offset)->limit($limit)->get();
         return Response::json($subscriptions, 200);
@@ -123,7 +120,7 @@ class SubscriptionController extends Controller
         $offset = ((int)$request->offset)? : null;
         $xml = ($request->xml)? : false;
         // Находим пользователя
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $request->email)->firstOrFail();
         // Формируем выдачу
         $subscriptions = Subscription::where('user_id', $user->id)->offset($offset)->limit($limit)->get();
         return Response::json($subscriptions, 200);
